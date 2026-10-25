@@ -1,0 +1,90 @@
+---
+- name: Create the Docker network
+  community.docker.docker_network:
+    name: "{{ ml_env_network }}"
+
+- name: Create the ML environment data directories
+  ansible.builtin.file:
+    path: "{{ ml_env_data_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ ml_env_uid }}"
+    group: "{{ ml_env_gid }}"
+    mode: "0755"
+  loop: [work, huggingface]
+
+- name: Create the ML environment compose directory
+  ansible.builtin.file:
+    path: "{{ ml_env_compose_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Write the ML environment Dockerfile
+  ansible.builtin.template:
+    src: Dockerfile.j2
+    dest: "{{ ml_env_compose_dir }}/Dockerfile"
+    mode: "0644"
+
+# The image is tagged with a hash of the package list, so it only builds when the packages change.
+- name: Build the ML environment image
+  community.docker.docker_image:
+    name: "{{ ml_env_image }}"
+    source: build
+    build:
+      path: "{{ ml_env_compose_dir }}"
+
+- name: Check for an existing Jupyter token
+  ansible.builtin.stat:
+    path: "{{ ml_env_token_file }}"
+  register: ml_env_token_stat
+
+- name: Generate the Jupyter token
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.password', '/dev/null length=40 chars=ascii_letters,digits') }}"
+    dest: "{{ ml_env_token_file }}"
+    mode: "0600"
+  when: not ml_env_token_stat.stat.exists
+  no_log: true
+
+- name: Read the Jupyter token
+  ansible.builtin.slurp:
+    src: "{{ ml_env_token_file }}"
+  register: ml_env_token_content
+  no_log: true
+
+- name: Write the ML environment compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ ml_env_compose_dir }}/compose.yml"
+    mode: "0600"
+  vars:
+    ml_env_token: "{{ ml_env_token_content.content | b64decode }}"
+  no_log: true
+
+- name: Start the ML environment
+  community.docker.docker_compose_v2:
+    project_src: "{{ ml_env_compose_dir }}"
+    state: present
+
+- name: Get the ML environment container
+  community.docker.docker_container_info:
+    name: ml-env
+  register: ml_env_info
+
+- name: Wait for JupyterLab
+  ansible.builtin.wait_for:
+    host: "{{ ml_env_info.container.NetworkSettings.Networks[ml_env_network].IPAddress }}"
+    port: "{{ ml_env_port }}"
+    timeout: 120
+
+- name: Check PyTorch sees the GPU
+  community.docker.docker_container_exec:
+    container: ml-env
+    command: >
+      python -c "import torch; assert torch.cuda.is_available();
+      print(torch.__version__, torch.cuda.get_device_name(0))"
+  register: ml_env_check
+  changed_when: false
+
+- name: Report
+  ansible.builtin.debug:
+    msg: "ML env: {{ ml_env_check.stdout }}"

@@ -1,0 +1,30 @@
+name: ml-env
+services:
+  ml-env:
+    image: {{ ml_env_image }}
+    container_name: ml-env
+    restart: unless-stopped
+{% if ml_env_external_access | bool %}
+    ports:
+      - "{{ ml_env_bind_address }}:{{ ml_env_port }}:8888"
+{% endif %}
+    volumes:
+      - {{ ml_env_data_dir }}/work:/work
+      - {{ ml_env_data_dir }}/huggingface:/home/ml/.cache/huggingface
+    environment:
+      JUPYTER_TOKEN: "{{ ml_env_token }}"
+    shm_size: {{ ml_env_shm_size }}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - ai
+
+networks:
+  ai:
+    name: {{ ml_env_network }}
+    external: true

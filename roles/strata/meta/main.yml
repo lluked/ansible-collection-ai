@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  author: lluked
+  description: Strata LLM engine from the upstream image, with a generated API key
+  license: MIT
+  min_ansible_version: '2.15'
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+  galaxy_tags:
+    - backend
+    - llm
+    - openai
+    - docker
+    - gpu
+dependencies: []

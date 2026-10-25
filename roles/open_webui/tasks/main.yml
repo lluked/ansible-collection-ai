@@ -1,0 +1,42 @@
+---
+- name: Create the Docker network
+  community.docker.docker_network:
+    name: "{{ open_webui_network }}"
+
+- name: Create the Open WebUI data directory
+  ansible.builtin.file:
+    path: "{{ open_webui_data_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Create the open-webui compose directory
+  ansible.builtin.file:
+    path: "{{ open_webui_compose_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Check for the Strata API key
+  ansible.builtin.stat:
+    path: "{{ open_webui_strata_api_key_file }}"
+  register: open_webui_strata_key_stat
+
+- name: Read the Strata API key
+  ansible.builtin.slurp:
+    src: "{{ open_webui_strata_api_key_file }}"
+  register: open_webui_strata_key_file
+  when: open_webui_strata_key_stat.stat.exists
+  no_log: true
+
+- name: Write the open-webui compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ open_webui_compose_dir }}/compose.yml"
+    mode: "0600"
+  vars:
+    open_webui_strata_key: "{{ (open_webui_strata_key_file.content | b64decode | trim) if open_webui_strata_key_stat.stat.exists else '' }}"
+  no_log: true
+
+- name: Start open-webui
+  community.docker.docker_compose_v2:
+    project_src: "{{ open_webui_compose_dir }}"
+    state: present

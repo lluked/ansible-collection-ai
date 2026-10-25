@@ -1,0 +1,37 @@
+---
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    uses: ./.github/workflows/pre-commit.yml
+
+  publish:
+    needs: lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install ansible-core
+        run: python -m pip install "ansible-core>=2.15,<2.19"
+      - name: Check the tag matches galaxy.yml
+        run: |
+          version=$(python -c "import yaml; print(yaml.safe_load(open('galaxy.yml'))['version'])")
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match galaxy.yml version ${version} (expected v${version})"
+            exit 1
+          fi
+      - name: Build the collection
+        run: ansible-galaxy collection build
+      - name: Publish to Galaxy
+        env:
+          GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
+        run: ansible-galaxy collection publish lluked-ai-*.tar.gz --token "$GALAXY_API_KEY"

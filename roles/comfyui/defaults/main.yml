@@ -1,0 +1,38 @@
+---
+comfyui_root: "{{ ai_root | default('/srv/ai') }}"
+
+# Models, inputs, outputs, saved workflows and custom nodes live here, outside the image.
+comfyui_data_dir: "{{ comfyui_root }}/comfyui-data"
+# Directories under the data directory that are mounted into the container.
+comfyui_data_subdirs: [models, input, output, user, custom_nodes]
+comfyui_compose_dir: "{{ comfyui_root }}/compose/comfyui"
+
+comfyui_repo: https://github.com/comfyanonymous/ComfyUI.git
+# Pinned so a rebuild gives the same code. Change it to update ComfyUI; the image is tagged with it.
+comfyui_ref: fb3befd168731438f88bc96e0920a538e8649878
+comfyui_image: "comfyui:{{ comfyui_ref[:12] }}"
+comfyui_port: 8188
+# Publish the port on the host, bound to comfyui_bind_address. Follows ai_backends_external_access when
+# that is set; this variable overrides it for this role. Containers on the ai network reach it by
+# name regardless.
+comfyui_external_access: "{{ ai_backends_external_access | default(true) | bool }}"
+# Host address the port binds to when external access is on.
+comfyui_bind_address: 127.0.0.1
+
+# The container runs as this uid and gid so files in the data directory belong to the ai user.
+comfyui_uid: 1000
+comfyui_gid: 1000
+
+# Models to download into the data directory. dest is relative to it (models/checkpoints, models/loras...).
+# The checksum makes a finished download skippable and catches a corrupt one.
+comfyui_models:
+  - name: SDXL base 1.0 (about 6.9 GB)
+    url: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
+    dest: models/checkpoints/sd_xl_base_1.0.safetensors
+    checksum: sha256:31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b
+
+# PyTorch CUDA wheel index. Change it to match the host's driver and GPU.
+comfyui_torch_package_index: "{{ ai_torch_package_index | default('https://download.pytorch.org/whl/cu128') }}"
+
+# Shares the ai_network default so Open WebUI and n8n reach it by name (http://comfyui:8188).
+comfyui_network: "{{ ai_network | default('ai') }}"

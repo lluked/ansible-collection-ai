@@ -1,0 +1,30 @@
+namespace: lluked
+name: ai
+version: 1.0.0
+readme: README.md
+authors:
+  - luke
+description: "Roles for hosting AI services: model servers, clients and fine-tuning tools."
+license:
+  - MIT
+repository: https://github.com/lluked/ansible-collection-ai
+homepage: https://github.com/lluked/ansible-collection-ai
+issues: https://github.com/lluked/ansible-collection-ai/issues
+tags:
+  - application
+  - tools
+  - ai
+  - llm
+  - docker
+  - gpu
+  - ollama
+dependencies:
+  community.docker: ">=3.6.0"
+build_ignore:
+  - .git
+  - .github
+  - "*.tar.gz"
+  - .ansible
+  - .ansible-lint
+  - .gitignore
+  - .pre-commit-config.yaml

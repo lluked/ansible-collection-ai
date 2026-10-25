@@ -1,0 +1,52 @@
+---
+argument_specs:
+  main:
+    short_description: 'Tool: fine-tuning environment in Docker (JupyterLab, PyTorch, transformers, peft,
+      trl)'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      ml_env_root:
+        type: str
+        description: Base directory for ML environment files.
+      ml_env_data_dir:
+        type: str
+        description: Host directory with the work and huggingface folders.
+      ml_env_compose_dir:
+        type: str
+        description: Directory the compose file and Dockerfile are written to.
+      ml_env_image:
+        type: str
+        description: Image tag, derived from a hash of the package list and PyTorch index.
+      ml_env_port:
+        type: int
+        description: Host port for JupyterLab.
+      ml_env_external_access:
+        type: bool
+        description: Publish the port on the host; follows ai_tools_external_access when that is set,
+          and overrides it for this role when set here.
+      ml_env_bind_address:
+        type: str
+        description: Host address the port binds to when external access is on.
+      ml_env_token_file:
+        type: str
+        description: File holding the generated JupyterLab token.
+      ml_env_uid:
+        type: int
+        description: uid the container runs as.
+      ml_env_gid:
+        type: int
+        description: gid the container runs as.
+      ml_env_shm_size:
+        type: str
+        description: Shared memory size for data loader workers, e.g. 8g.
+      ml_env_torch_package_index:
+        type: str
+        description: PyTorch CUDA wheel index; change it to match the host's driver and GPU.
+      ml_env_packages:
+        type: list
+        description: Python packages installed on top of PyTorch.
+        elements: str
+      ml_env_network:
+        type: str
+        description: Docker network shared with the other services.

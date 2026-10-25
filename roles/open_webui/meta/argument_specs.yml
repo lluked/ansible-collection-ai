@@ -1,0 +1,54 @@
+---
+argument_specs:
+  main:
+    short_description: 'Client: Open WebUI chat and image front end in Docker'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      open_webui_image:
+        type: str
+        description: Container image.
+      open_webui_port:
+        type: int
+        description: Host port for the web UI.
+      open_webui_external_access:
+        type: bool
+        description: Publish the port on the host; follows ai_clients_external_access when that is set,
+          and overrides it for this role when set here.
+      open_webui_bind_address:
+        type: str
+        description: Host address the port binds to when external access is on.
+      open_webui_data_dir:
+        type: str
+        description: Host directory for chats, documents and settings.
+      open_webui_ollama_url:
+        type: str
+        description: Ollama API URL.
+      open_webui_strata_url:
+        type: str
+        description: Strata OpenAI-compatible API URL.
+      open_webui_strata_api_key_file:
+        type: str
+        description: File holding the Strata key; the connection is left out if it does not exist.
+      open_webui_comfyui_url:
+        type: str
+        description: ComfyUI base URL for image generation.
+      open_webui_image_model:
+        type: str
+        description: Checkpoint file name used for images.
+      open_webui_image_size:
+        type: str
+        description: Image size as WIDTHxHEIGHT.
+      open_webui_image_steps:
+        type: int
+        description: Sampler steps per image.
+      open_webui_comfyui_nodes:
+        type: list
+        description: Mapping from request fields to node ids in the ComfyUI workflow.
+        elements: dict
+      open_webui_network:
+        type: str
+        description: Docker network shared with the other services.
+      open_webui_compose_dir:
+        type: str
+        description: Directory the compose file is written to.

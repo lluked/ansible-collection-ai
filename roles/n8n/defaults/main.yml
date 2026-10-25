@@ -1,0 +1,25 @@
+---
+n8n_image: docker.n8n.io/n8nio/n8n:latest
+n8n_port: 5678
+# Publish the port on the host, bound to n8n_bind_address. Follows ai_clients_external_access when
+# that is set; this variable overrides it for this role. Containers on the ai network reach it by
+# name regardless.
+n8n_external_access: "{{ ai_clients_external_access | default(true) | bool }}"
+# Host address the port binds to when external access is on. Set to 0.0.0.0 to serve the LAN.
+n8n_bind_address: 127.0.0.1
+n8n_data_dir: "{{ ai_root | default('/srv/ai') }}/n8n"
+n8n_timezone: Europe/London
+
+# Plain HTTP on the LAN, so the secure-cookie requirement would lock the login out. Set to true behind TLS.
+n8n_secure_cookie: false
+
+# Reach Ollama from n8n credentials at this URL (shared Docker network, resolved by name).
+n8n_ollama_port: "{{ ollama_port | default(11434) }}"
+n8n_ollama_url: "http://ollama:{{ n8n_ollama_port }}"
+
+# Reach Qdrant from n8n vector store nodes at this URL.
+n8n_qdrant_url: "http://qdrant:{{ qdrant_port | default(6333) }}"
+
+# Shares the ai_network default with ollama so the two can reach each other by name.
+n8n_network: "{{ ai_network | default('ai') }}"
+n8n_compose_dir: "{{ ai_root | default('/srv/ai') }}/compose/n8n"

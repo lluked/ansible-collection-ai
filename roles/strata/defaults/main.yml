@@ -1,0 +1,22 @@
+---
+# Upstream's prebuilt CUDA 13 image (RTX 20/30/40/50, driver 580+).
+strata_image: ghcr.io/niko1221/strata:0.2.3-cuda13
+strata_port: 8080
+
+# Publish the port on the host, bound to strata_bind_address. Follows ai_backends_external_access when
+# that is set; this variable overrides it for this role. Containers on the ai network reach it by
+# name regardless.
+strata_external_access: "{{ ai_backends_external_access | default(false) | bool }}"
+# Host address the port binds to when external access is on.
+strata_bind_address: 127.0.0.1
+
+# Upstream's Docker example uses IQ3_XXS, which needs about 48 GB of RAM plus VRAM together.
+# Pick a smaller quant (upstream lists 32 GB and 40 GB options) if the host has less memory.
+strata_model: IQ3_XXS
+
+# Generated on first run and kept here so later runs do not rotate it.
+strata_api_key_file: "{{ ai_root | default('/srv/ai') }}/strata-api-key"
+
+strata_volume: strata-data
+strata_network: "{{ ai_network | default('ai') }}"
+strata_compose_dir: "{{ ai_root | default('/srv/ai') }}/compose/strata"

@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  author: lluked
+  description: "Fine-tuning environment in Docker with JupyterLab, PyTorch, transformers, peft and trl"
+  license: MIT
+  min_ansible_version: '2.15'
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+  galaxy_tags:
+    - tool
+    - finetuning
+    - jupyter
+    - docker
+    - gpu
+dependencies: []

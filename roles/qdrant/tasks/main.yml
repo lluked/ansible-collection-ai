@@ -1,0 +1,40 @@
+---
+- name: Create the Docker network
+  community.docker.docker_network:
+    name: "{{ qdrant_network }}"
+
+- name: Create the Qdrant data directory
+  ansible.builtin.file:
+    path: "{{ qdrant_data_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Create the Qdrant compose directory
+  ansible.builtin.file:
+    path: "{{ qdrant_compose_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Write the Qdrant compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ qdrant_compose_dir }}/compose.yml"
+    mode: "0644"
+
+- name: Start Qdrant
+  community.docker.docker_compose_v2:
+    project_src: "{{ qdrant_compose_dir }}"
+    state: present
+
+- name: Get the Qdrant container
+  community.docker.docker_container_info:
+    name: qdrant
+  register: qdrant_info
+
+- name: Wait for Qdrant
+  ansible.builtin.uri:
+    url: "http://{{ qdrant_info.container.NetworkSettings.Networks[qdrant_network].IPAddress }}:{{ qdrant_port }}/healthz"
+  register: qdrant_health
+  retries: 30
+  delay: 2
+  until: qdrant_health.status == 200

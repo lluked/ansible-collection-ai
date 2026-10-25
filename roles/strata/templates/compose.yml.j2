@@ -1,0 +1,36 @@
+name: strata
+services:
+  strata:
+    image: {{ strata_image }}
+    container_name: strata
+    restart: unless-stopped
+{% if strata_external_access | bool %}
+    ports:
+      - "{{ strata_bind_address }}:{{ strata_port }}:8080"
+{% endif %}
+    volumes:
+      - {{ strata_volume }}:/data
+    environment:
+      MODEL: "{{ strata_model }}"
+      API_KEY: "{{ strata_api_key }}"
+    shm_size: 2g
+    ulimits:
+      memlock: -1
+    stop_grace_period: 120s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - ai
+
+volumes:
+  {{ strata_volume }}:
+
+networks:
+  ai:
+    name: {{ strata_network }}
+    external: true

@@ -1,0 +1,43 @@
+---
+- name: Create the Docker network
+  community.docker.docker_network:
+    name: "{{ n8n_network }}"
+
+# The n8n image runs as the node user (uid 1000) and must be able to write its data directory.
+- name: Create the n8n data directory
+  ansible.builtin.file:
+    path: "{{ n8n_data_dir }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0755"
+
+- name: Create the n8n compose directory
+  ansible.builtin.file:
+    path: "{{ n8n_compose_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Write the n8n compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ n8n_compose_dir }}/compose.yml"
+    mode: "0644"
+
+- name: Start n8n
+  community.docker.docker_compose_v2:
+    project_src: "{{ n8n_compose_dir }}"
+    state: present
+
+- name: Get the n8n container
+  community.docker.docker_container_info:
+    name: n8n
+  register: n8n_info
+
+- name: Wait for n8n
+  ansible.builtin.uri:
+    url: "http://{{ n8n_info.container.NetworkSettings.Networks[n8n_network].IPAddress }}:{{ n8n_port }}/healthz"
+  register: n8n_health
+  retries: 30
+  delay: 2
+  until: n8n_health.status == 200

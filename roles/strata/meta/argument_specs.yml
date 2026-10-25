@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: 'Backend: Strata LLM engine in Docker (OpenAI-compatible API)'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      strata_image:
+        type: str
+        description: Prebuilt upstream image, including the CUDA flavour.
+      strata_port:
+        type: int
+        description: Host port for the API.
+      strata_external_access:
+        type: bool
+        description: Publish the port on the host; follows ai_backends_external_access when that is set,
+          and overrides it for this role when set here.
+      strata_bind_address:
+        type: str
+        description: Host address the port binds to when external access is on.
+      strata_model:
+        type: str
+        description: Model size or quant passed as MODEL; larger ones need more RAM plus VRAM.
+      strata_api_key_file:
+        type: str
+        description: File holding the generated API key, read by other roles such as open_webui.
+      strata_volume:
+        type: str
+        description: Docker volume for models and state.
+      strata_network:
+        type: str
+        description: Docker network shared with the other services.
+      strata_compose_dir:
+        type: str
+        description: Directory the compose file is written to.

@@ -1,0 +1,57 @@
+---
+- name: Create the Docker network
+  community.docker.docker_network:
+    name: "{{ ollama_network }}"
+
+- name: Create the Ollama data directory
+  ansible.builtin.file:
+    path: "{{ ollama_data_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Create the ollama compose directory
+  ansible.builtin.file:
+    path: "{{ ollama_compose_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Write the ollama compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ ollama_compose_dir }}/compose.yml"
+    mode: "0644"
+
+- name: Start ollama
+  community.docker.docker_compose_v2:
+    project_src: "{{ ollama_compose_dir }}"
+    state: present
+
+- name: Get the Ollama container
+  community.docker.docker_container_info:
+    name: ollama
+  register: ollama_info
+
+- name: Wait for the Ollama API
+  ansible.builtin.uri:
+    url: "http://{{ ollama_info.container.NetworkSettings.Networks[ollama_network].IPAddress }}:{{ ollama_port }}/api/version"
+  register: ollama_api
+  retries: 30
+  delay: 2
+  until: ollama_api.status == 200
+
+- name: List installed models
+  community.docker.docker_container_exec:
+    container: ollama
+    command: ollama list
+  register: ollama_list
+  changed_when: false
+
+- name: Pull models
+  community.docker.docker_container_exec:
+    container: ollama
+    command: "ollama pull {{ item }}"
+  loop: "{{ ollama_models }}"
+  when: >-
+    item not in ollama_installed and (item ~ ':latest') not in ollama_installed
+  vars:
+    ollama_installed: "{{ ollama_list.stdout_lines[1:] | map('split') | map('first') | list }}"

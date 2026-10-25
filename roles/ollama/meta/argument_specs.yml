@@ -1,0 +1,39 @@
+---
+argument_specs:
+  main:
+    short_description: 'Backend: Ollama model server in Docker (chat and embeddings)'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      ollama_image:
+        type: str
+        description: Container image.
+      ollama_port:
+        type: int
+        description: Host port for the Ollama API.
+      ollama_external_access:
+        type: bool
+        description: Publish the port on the host; follows ai_backends_external_access when that is set,
+          and overrides it for this role when set here.
+      ollama_bind_address:
+        type: str
+        description: Host address the port binds to when external access is on.
+      ollama_data_dir:
+        type: str
+        description: Host directory for models and Ollama state.
+      ollama_network:
+        type: str
+        description: Docker network shared with the other services.
+      ollama_compose_dir:
+        type: str
+        description: Directory the compose file is written to.
+      ollama_models:
+        type: list
+        description: Models to pull on first run, by Ollama tag.
+        elements: str
+      ollama_context_length:
+        type: int
+        description: Context window in tokens; larger values use more VRAM.
+      ollama_keep_alive:
+        type: str
+        description: How long a model stays loaded after its last request, e.g. 30m.

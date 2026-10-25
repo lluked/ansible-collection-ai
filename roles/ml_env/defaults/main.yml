@@ -1,0 +1,43 @@
+---
+ml_env_root: "{{ ai_root | default('/srv/ai') }}"
+
+# Notebooks and scripts live in work; downloaded Hugging Face models and datasets live in huggingface.
+ml_env_data_dir: "{{ ml_env_root }}/ml-env-data"
+ml_env_compose_dir: "{{ ml_env_root }}/compose/ml-env"
+
+# Tagged with a hash of the package list, so changing the packages rebuilds the image.
+ml_env_image: "ml-env:{{ (ml_env_packages | join(',') ~ ml_env_torch_package_index) | hash('sha1') | truncate(12, True, '') }}"
+ml_env_port: 8888
+
+# Publish the port on the host, bound to ml_env_bind_address. Follows ai_tools_external_access when that
+# is set; this variable overrides it for this role. Containers on the ai network reach it by name
+# regardless.
+ml_env_external_access: "{{ ai_tools_external_access | default(true) | bool }}"
+# Host address the port binds to when external access is on. JupyterLab runs code as the container
+# user and its token is the only protection, so set 0.0.0.0 only on a network you trust.
+ml_env_bind_address: 127.0.0.1
+ml_env_token_file: "{{ ml_env_root }}/ml-env-token"
+
+# The container runs as this uid and gid so files in the data directory belong to the ai user.
+ml_env_uid: 1000
+ml_env_gid: 1000
+
+# Data loader workers pass tensors through shared memory, which Docker limits to 64 MB by default.
+ml_env_shm_size: 8g
+
+# PyTorch CUDA wheel index. Change it to match the host's driver and GPU.
+ml_env_torch_package_index: "{{ ai_torch_package_index | default('https://download.pytorch.org/whl/cu128') }}"
+
+# Fine-tuning and distillation stack.
+ml_env_packages:
+  - transformers
+  - datasets
+  - accelerate
+  - peft
+  - trl
+  - bitsandbytes
+  - sentencepiece
+  - huggingface_hub
+  - jupyterlab
+
+ml_env_network: "{{ ai_network | default('ai') }}"

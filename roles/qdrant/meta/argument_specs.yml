@@ -1,0 +1,29 @@
+---
+argument_specs:
+  main:
+    short_description: 'Backend: Qdrant vector store in Docker'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      qdrant_image:
+        type: str
+        description: Container image.
+      qdrant_port:
+        type: int
+        description: Host port for the Qdrant API.
+      qdrant_external_access:
+        type: bool
+        description: Publish the port on the host; follows ai_backends_external_access when that is set,
+          and overrides it for this role when set here.
+      qdrant_bind_address:
+        type: str
+        description: Host address the port binds to when external access is on.
+      qdrant_data_dir:
+        type: str
+        description: Host directory for stored collections.
+      qdrant_network:
+        type: str
+        description: Docker network shared with the other services.
+      qdrant_compose_dir:
+        type: str
+        description: Directory the compose file is written to.

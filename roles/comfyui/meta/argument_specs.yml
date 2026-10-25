@@ -1,0 +1,56 @@
+---
+argument_specs:
+  main:
+    short_description: 'Backend: ComfyUI image generation in Docker'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      comfyui_root:
+        type: str
+        description: Base directory for ComfyUI files.
+      comfyui_data_dir:
+        type: str
+        description: Host directory for models, inputs, outputs, workflows and custom nodes.
+      comfyui_data_subdirs:
+        type: list
+        description: Directories under the data directory that are mounted into the container.
+        elements: str
+      comfyui_compose_dir:
+        type: str
+        description: Directory the compose file and Dockerfile are written to.
+      comfyui_repo:
+        type: str
+        description: Upstream git repository the image is built from.
+      comfyui_ref:
+        type: str
+        description: Pinned commit that is built; changing it rebuilds the image.
+      comfyui_image:
+        type: str
+        description: Image tag, derived from the pinned commit.
+      comfyui_port:
+        type: int
+        description: Host port for the web UI and API.
+      comfyui_external_access:
+        type: bool
+        description: Publish the port on the host; follows ai_backends_external_access when that is set,
+          and overrides it for this role when set here.
+      comfyui_bind_address:
+        type: str
+        description: Host address the port binds to when external access is on.
+      comfyui_uid:
+        type: int
+        description: uid the container runs as.
+      comfyui_gid:
+        type: int
+        description: gid the container runs as.
+      comfyui_models:
+        type: list
+        description: Models to download, each with name, url, dest (relative to the data directory) and
+          optional checksum.
+        elements: dict
+      comfyui_torch_package_index:
+        type: str
+        description: PyTorch CUDA wheel index; change it to match the host's driver and GPU.
+      comfyui_network:
+        type: str
+        description: Docker network shared with the other services.

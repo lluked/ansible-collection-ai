@@ -1,0 +1,17 @@
+FROM python:3.12-slim
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential git \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir torch torchvision --index-url {{ ml_env_torch_package_index }} \
+ && pip install --no-cache-dir {{ ml_env_packages | join(' ') }}
+
+RUN groupadd -g {{ ml_env_gid }} ml \
+ && useradd -m -u {{ ml_env_uid }} -g {{ ml_env_gid }} -s /bin/bash ml
+USER ml
+WORKDIR /work
+
+ENV HF_HOME=/home/ml/.cache/huggingface
+EXPOSE 8888
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--ServerApp.root_dir=/work"]

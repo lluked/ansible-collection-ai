@@ -1,0 +1,14 @@
+---
+qdrant_image: qdrant/qdrant:latest
+qdrant_port: 6333
+# Publish the port on the host, bound to qdrant_bind_address. Follows ai_backends_external_access when
+# that is set; this variable overrides it for this role. Containers on the ai network reach it by
+# name regardless.
+qdrant_external_access: "{{ ai_backends_external_access | default(true) | bool }}"
+# Host address the port binds to when external access is on.
+qdrant_bind_address: 127.0.0.1
+qdrant_data_dir: "{{ ai_root | default('/srv/ai') }}/qdrant"
+
+# Shares the ai_network default with ollama and n8n so they can reach it by name (http://qdrant:6333).
+qdrant_network: "{{ ai_network | default('ai') }}"
+qdrant_compose_dir: "{{ ai_root | default('/srv/ai') }}/compose/qdrant"

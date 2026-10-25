@@ -1,0 +1,44 @@
+---
+argument_specs:
+  main:
+    short_description: 'Client: n8n workflow automation in Docker'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      n8n_image:
+        type: str
+        description: Container image.
+      n8n_port:
+        type: int
+        description: Host port for the web UI.
+      n8n_external_access:
+        type: bool
+        description: Publish the port on the host; follows ai_clients_external_access when that is set,
+          and overrides it for this role when set here.
+      n8n_bind_address:
+        type: str
+        description: Host address the port binds to when external access is on.
+      n8n_data_dir:
+        type: str
+        description: Host directory for workflows and credentials.
+      n8n_timezone:
+        type: str
+        description: Timezone for schedules and logs.
+      n8n_secure_cookie:
+        type: bool
+        description: Require HTTPS for the login cookie; leave false on plain HTTP.
+      n8n_ollama_port:
+        type: int
+        description: Ollama port, used to build n8n_ollama_url.
+      n8n_ollama_url:
+        type: str
+        description: Ollama URL to enter in n8n credentials.
+      n8n_qdrant_url:
+        type: str
+        description: Qdrant URL to enter in n8n vector store credentials.
+      n8n_network:
+        type: str
+        description: Docker network shared with the other services.
+      n8n_compose_dir:
+        type: str
+        description: Directory the compose file is written to.

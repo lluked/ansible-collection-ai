@@ -1,0 +1,28 @@
+name: comfyui
+services:
+  comfyui:
+    image: {{ comfyui_image }}
+    container_name: comfyui
+    restart: unless-stopped
+{% if comfyui_external_access | bool %}
+    ports:
+      - "{{ comfyui_bind_address }}:{{ comfyui_port }}:8188"
+{% endif %}
+    volumes:
+{% for d in comfyui_data_subdirs %}
+      - {{ comfyui_data_dir }}/{{ d }}:/app/{{ d }}
+{% endfor %}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - ai
+
+networks:
+  ai:
+    name: {{ comfyui_network }}
+    external: true

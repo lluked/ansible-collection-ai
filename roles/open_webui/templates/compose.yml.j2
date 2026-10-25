@@ -1,0 +1,32 @@
+name: open-webui
+services:
+  open-webui:
+    image: {{ open_webui_image }}
+    container_name: open-webui
+    restart: unless-stopped
+{% if open_webui_external_access | bool %}
+    ports:
+      - "{{ open_webui_bind_address }}:{{ open_webui_port }}:8080"
+{% endif %}
+    volumes:
+      - {{ open_webui_data_dir }}:/app/backend/data
+    environment:
+      OLLAMA_BASE_URL: "{{ open_webui_ollama_url }}"
+{% if open_webui_strata_key | default('') | length > 0 %}
+      OPENAI_API_BASE_URL: "{{ open_webui_strata_url }}"
+      OPENAI_API_KEY: "{{ open_webui_strata_key }}"
+{% endif %}
+      ENABLE_IMAGE_GENERATION: "true"
+      IMAGE_GENERATION_ENGINE: comfyui
+      IMAGE_GENERATION_MODEL: "{{ open_webui_image_model }}"
+      IMAGE_SIZE: "{{ open_webui_image_size }}"
+      IMAGE_STEPS: "{{ open_webui_image_steps }}"
+      COMFYUI_BASE_URL: "{{ open_webui_comfyui_url }}"
+      COMFYUI_WORKFLOW_NODES: {{ open_webui_comfyui_nodes | to_json | to_json }}
+    networks:
+      - ai
+
+networks:
+  ai:
+    name: {{ open_webui_network }}
+    external: true

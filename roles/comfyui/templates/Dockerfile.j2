@@ -1,0 +1,24 @@
+FROM python:3.12-slim
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git libgl1 libglib2.0-0 \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+RUN git init -q \
+ && git remote add origin {{ comfyui_repo }} \
+ && git fetch -q --depth 1 origin {{ comfyui_ref }} \
+ && git checkout -q FETCH_HEAD
+
+RUN pip install --no-cache-dir torch torchvision torchaudio --index-url {{ comfyui_torch_package_index }} \
+ && pip install --no-cache-dir -r requirements.txt
+
+# PyTorch looks up the current user by uid at import time, so the uid needs a passwd entry.
+RUN groupadd -g {{ comfyui_gid }} comfyui \
+ && useradd -u {{ comfyui_uid }} -g {{ comfyui_gid }} -d /tmp -s /usr/sbin/nologin comfyui \
+ && chown -R {{ comfyui_uid }}:{{ comfyui_gid }} /app
+USER {{ comfyui_uid }}:{{ comfyui_gid }}
+
+ENV HOME=/tmp PYTHONUNBUFFERED=1
+EXPOSE 8188
+CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]

@@ -1,0 +1,21 @@
+---
+ollama_image: ollama/ollama:latest
+ollama_port: 11434
+# Publish the port on the host, bound to ollama_bind_address. Follows ai_backends_external_access when
+# that is set; this variable overrides it for this role. Containers on the ai network reach it by
+# name regardless.
+ollama_external_access: "{{ ai_backends_external_access | default(false) | bool }}"
+# Host address the port binds to when external access is on.
+ollama_bind_address: 127.0.0.1
+ollama_data_dir: "{{ ai_root | default('/srv/ai') }}/ollama"
+ollama_network: "{{ ai_network | default('ai') }}"
+ollama_compose_dir: "{{ ai_root | default('/srv/ai') }}/compose/ollama"
+
+# A small chat model and the embedding model for RAG.
+ollama_models:
+  - qwen3.5:4b
+  - nomic-embed-text
+
+# Coding needs more context than Ollama's 4k default. Larger values use more VRAM for the KV cache.
+ollama_context_length: 16384
+ollama_keep_alive: 30m

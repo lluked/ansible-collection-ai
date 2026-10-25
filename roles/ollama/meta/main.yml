@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  author: lluked
+  description: Ollama in Docker, pulling the chat and embedding models
+  license: MIT
+  min_ansible_version: '2.15'
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+  galaxy_tags:
+    - backend
+    - llm
+    - embeddings
+    - docker
+    - gpu
+dependencies: []

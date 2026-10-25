@@ -1,0 +1,60 @@
+---
+- name: Create the Docker network
+  community.docker.docker_network:
+    name: "{{ strata_network }}"
+
+- name: Pull the Strata image
+  community.docker.docker_image:
+    name: "{{ strata_image }}"
+    source: pull
+
+- name: Check for an existing API key
+  ansible.builtin.stat:
+    path: "{{ strata_api_key_file }}"
+  register: strata_key_stat
+
+- name: Generate the API key
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.password', '/dev/null length=40 chars=ascii_letters,digits') }}"
+    dest: "{{ strata_api_key_file }}"
+    mode: "0600"
+  when: not strata_key_stat.stat.exists
+  no_log: true
+
+- name: Read the API key
+  ansible.builtin.slurp:
+    src: "{{ strata_api_key_file }}"
+  register: strata_key_file
+  no_log: true
+
+- name: Create the Strata compose directory
+  ansible.builtin.file:
+    path: "{{ strata_compose_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Write the Strata compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ strata_compose_dir }}/compose.yml"
+    mode: "0600"
+  vars:
+    strata_api_key: "{{ strata_key_file.content | b64decode }}"
+  no_log: true
+
+- name: Start Strata
+  community.docker.docker_compose_v2:
+    project_src: "{{ strata_compose_dir }}"
+    state: present
+
+- name: Get the Strata container
+  community.docker.docker_container_info:
+    name: strata
+  register: strata_info
+
+# The first start downloads the model weights (tens of GB), so allow a long wait.
+- name: Wait for Strata
+  ansible.builtin.wait_for:
+    host: "{{ strata_info.container.NetworkSettings.Networks[strata_network].IPAddress }}"
+    port: "{{ strata_port }}"
+    timeout: 7200

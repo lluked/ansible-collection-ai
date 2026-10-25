@@ -1,0 +1,80 @@
+---
+- name: Create the Docker network
+  community.docker.docker_network:
+    name: "{{ comfyui_network }}"
+
+- name: Create the ComfyUI data directories
+  ansible.builtin.file:
+    path: "{{ comfyui_data_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ comfyui_uid }}"
+    group: "{{ comfyui_gid }}"
+    mode: "0755"
+  loop: "{{ comfyui_data_subdirs }}"
+
+- name: Create the model directories
+  ansible.builtin.file:
+    path: "{{ (comfyui_data_dir ~ '/' ~ item.dest) | dirname }}"
+    state: directory
+    owner: "{{ comfyui_uid }}"
+    group: "{{ comfyui_gid }}"
+    mode: "0755"
+  loop: "{{ comfyui_models }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Download models
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ comfyui_data_dir }}/{{ item.dest }}"
+    checksum: "{{ item.checksum | default(omit) }}"
+    owner: "{{ comfyui_uid }}"
+    group: "{{ comfyui_gid }}"
+    mode: "0644"
+    timeout: 60
+  loop: "{{ comfyui_models }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create the ComfyUI compose directory
+  ansible.builtin.file:
+    path: "{{ comfyui_compose_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Write the ComfyUI Dockerfile
+  ansible.builtin.template:
+    src: Dockerfile.j2
+    dest: "{{ comfyui_compose_dir }}/Dockerfile"
+    mode: "0644"
+
+- name: Build the ComfyUI image
+  community.docker.docker_image:
+    name: "{{ comfyui_image }}"
+    source: build
+    build:
+      path: "{{ comfyui_compose_dir }}"
+
+- name: Write the ComfyUI compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ comfyui_compose_dir }}/compose.yml"
+    mode: "0644"
+
+- name: Start ComfyUI
+  community.docker.docker_compose_v2:
+    project_src: "{{ comfyui_compose_dir }}"
+    state: present
+
+- name: Get the ComfyUI container
+  community.docker.docker_container_info:
+    name: comfyui
+  register: comfyui_info
+
+- name: Wait for ComfyUI
+  ansible.builtin.uri:
+    url: "http://{{ comfyui_info.container.NetworkSettings.Networks[comfyui_network].IPAddress }}:{{ comfyui_port }}/system_stats"
+  register: comfyui_health
+  retries: 60
+  delay: 15
+  until: comfyui_health.status == 200

@@ -1,0 +1,19 @@
+name: qdrant
+services:
+  qdrant:
+    image: {{ qdrant_image }}
+    container_name: qdrant
+    restart: unless-stopped
+{% if qdrant_external_access | bool %}
+    ports:
+      - "{{ qdrant_bind_address }}:{{ qdrant_port }}:6333"
+{% endif %}
+    volumes:
+      - {{ qdrant_data_dir }}:/qdrant/storage
+    networks:
+      - ai
+
+networks:
+  ai:
+    name: {{ qdrant_network }}
+    external: true
