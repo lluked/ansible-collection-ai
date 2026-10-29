@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: lluked
+  description: NVIDIA server driver from Ubuntu's repos, rebooting when it changes
+  license: MIT
+  min_ansible_version: '2.15'
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+  galaxy_tags:
+    - nvidia
+    - gpu
+    - driver
+dependencies: []

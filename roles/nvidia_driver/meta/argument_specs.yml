@@ -1,0 +1,10 @@
+---
+argument_specs:
+  main:
+    short_description: 'Host: NVIDIA server driver from Ubuntu''s repos'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      nvidia_driver_package:
+        type: str
+        description: Driver package to install from Ubuntu's repos.

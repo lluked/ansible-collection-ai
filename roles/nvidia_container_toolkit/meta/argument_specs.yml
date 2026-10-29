@@ -1,0 +1,13 @@
+---
+argument_specs:
+  main:
+    short_description: 'Host: NVIDIA container toolkit configured as a Docker runtime'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      nvidia_container_toolkit_repo_uri:
+        type: str
+        description: Apt repository the toolkit is installed from.
+      nvidia_container_toolkit_repo_key:
+        type: str
+        description: URL of the repository signing key.

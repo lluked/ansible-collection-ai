@@ -13,3 +13,14 @@ repos:
       - id: ansible-lint
         additional_dependencies:
           - ansible-core>=2.15,<2.19
+  - repo: local
+    hooks:
+      - id: galaxy-import-check
+        name: galaxy import check
+        entry: _pre_commit_hooks/galaxy-import-check.sh
+        language: python
+        additional_dependencies:
+          - galaxy-importer
+          - ansible-core>=2.15,<2.19
+        pass_filenames: false
+        always_run: true
