@@ -3,9 +3,9 @@
   ansible.builtin.deb822_repository:
     name: nvidia-container-toolkit
     types: deb
-    uris: "{{ nvidia_ctk_repo_uri }}"
+    uris: "{{ nvidia_container_toolkit_repo_uri }}"
     suites: "/"
-    signed_by: "{{ nvidia_ctk_repo_key }}"
+    signed_by: "{{ nvidia_container_toolkit_repo_key }}"
 
 - name: Install NVIDIA container toolkit
   ansible.builtin.apt:

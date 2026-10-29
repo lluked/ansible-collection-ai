@@ -6,9 +6,8 @@
       - dkms
       - "{{ nvidia_driver_package }}"
     state: present
-  register: nvidia_driver_install
+  notify: Reboot to load the NVIDIA driver
 
-- name: Reboot to load the NVIDIA driver
-  ansible.builtin.reboot:
-    reboot_timeout: 900
-  when: nvidia_driver_install.changed
+# The driver must be loaded before the roles that follow use the GPU.
+- name: Reboot now if the driver changed
+  ansible.builtin.meta: flush_handlers
