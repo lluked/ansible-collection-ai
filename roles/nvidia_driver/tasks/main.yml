@@ -1,0 +1,13 @@
+---
+- name: Install kernel headers and the NVIDIA driver
+  ansible.builtin.apt:
+    name:
+      - "linux-headers-{{ ansible_facts['kernel'] }}"
+      - dkms
+      - "{{ nvidia_driver_package }}"
+    state: present
+  notify: Reboot to load the NVIDIA driver
+
+# The driver must be loaded before the roles that follow use the GPU.
+- name: Reboot now if the driver changed
+  ansible.builtin.meta: flush_handlers
