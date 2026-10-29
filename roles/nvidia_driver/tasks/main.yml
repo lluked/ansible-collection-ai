@@ -1,0 +1,14 @@
+---
+- name: Install kernel headers and the NVIDIA driver
+  ansible.builtin.apt:
+    name:
+      - "linux-headers-{{ ansible_facts['kernel'] }}"
+      - dkms
+      - "{{ nvidia_driver_package }}"
+    state: present
+  register: nvidia_driver_install
+
+- name: Reboot to load the NVIDIA driver
+  ansible.builtin.reboot:
+    reboot_timeout: 900
+  when: nvidia_driver_install.changed

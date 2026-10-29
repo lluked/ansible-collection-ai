@@ -4,6 +4,16 @@ Roles for running AI services on a host. Each role installs everything it needs,
 on its own on a host that already has Docker (and the NVIDIA container toolkit for the GPU roles). The Docker roles
 join a shared `ai` network, so they reach each other by container name.
 
+## Host
+
+GPU setup for the host itself, run before the Docker roles.
+
+| Role | Provides |
+|---|---|
+| nvidia_driver | NVIDIA server driver from Ubuntu's repos, rebooting when it changes |
+| nvidia_container_toolkit | NVIDIA container toolkit from NVIDIA's apt repo, configured as a Docker runtime |
+| nvidia_gpu_check | Checks the GPU is visible on the host and inside a container, and reports it |
+
 ## Backends
 
 Services that serve models or store data. Other containers reach them by name over the `ai` network.

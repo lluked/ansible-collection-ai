@@ -1,0 +1,5 @@
+---
+# Headless/compute driver from Ubuntu's repos. 615 is the newest branch available for noble and
+# ships open kernel modules only, which need a Turing or newer GPU.
+# Older branches are just metapackages that redirect upward (570 -> 580, 590 -> 595, 610 -> 615).
+nvidia_driver_package: nvidia-driver-615-server-open

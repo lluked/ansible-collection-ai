@@ -1,0 +1,19 @@
+---
+- name: Check the GPU on the host
+  ansible.builtin.command: nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
+  register: nvidia_gpu_check_host
+  changed_when: false
+  retries: 5
+  delay: 10
+  until: nvidia_gpu_check_host.rc == 0
+
+- name: Check the GPU inside a container
+  ansible.builtin.command: docker run --rm --gpus all {{ nvidia_gpu_check_image }} nvidia-smi -L
+  register: nvidia_gpu_check_container
+  changed_when: false
+
+- name: Report
+  ansible.builtin.debug:
+    msg:
+      - "Host GPU: {{ nvidia_gpu_check_host.stdout }}"
+      - "Container GPU: {{ nvidia_gpu_check_container.stdout }}"
