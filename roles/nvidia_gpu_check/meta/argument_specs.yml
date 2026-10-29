@@ -1,0 +1,10 @@
+---
+argument_specs:
+  main:
+    short_description: 'Host: check the GPU on the host and inside a container'
+    description:
+      - Defaults for every option are in defaults/main.yml.
+    options:
+      nvidia_gpu_check_image:
+        type: str
+        description: Image the container check runs in.
