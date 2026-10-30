@@ -13,12 +13,18 @@
     name: nvidia-container-toolkit
     state: present
 
+- name: Check whether Docker already has the NVIDIA runtime configured
+  ansible.builtin.command: grep -q '"nvidia"' /etc/docker/daemon.json
+  register: nvidia_runtime_check
+  failed_when: false
+  changed_when: false
+  check_mode: false
+
 - name: Configure Docker to use the NVIDIA runtime
   ansible.builtin.command: nvidia-ctk runtime configure --runtime=docker
-  register: nvidia_ctk_configure
-  changed_when: nvidia_ctk_configure.rc == 0
+  when: nvidia_runtime_check.rc != 0
+  changed_when: true
+  notify: Restart Docker
 
-- name: Restart Docker
-  ansible.builtin.systemd:
-    name: docker
-    state: restarted
+- name: Restart Docker now if the runtime was configured
+  ansible.builtin.meta: flush_handlers
