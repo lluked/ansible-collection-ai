@@ -22,12 +22,9 @@
 
 - name: Configure Docker to use the NVIDIA runtime
   ansible.builtin.command: nvidia-ctk runtime configure --runtime=docker
-  register: nvidia_ctk_configure
   when: nvidia_runtime_check.rc != 0
   changed_when: true
+  notify: Restart Docker
 
-- name: Restart Docker
-  ansible.builtin.systemd:
-    name: docker
-    state: restarted
-  when: nvidia_ctk_configure is changed
+- name: Restart Docker now if the runtime was configured
+  ansible.builtin.meta: flush_handlers
