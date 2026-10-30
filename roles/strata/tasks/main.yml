@@ -8,6 +8,12 @@
     name: "{{ strata_image }}"
     source: pull
 
+- name: Create the API key directory
+  ansible.builtin.file:
+    path: "{{ strata_api_key_file | dirname }}"
+    state: directory
+    mode: "0755"
+
 - name: Check for an existing API key
   ansible.builtin.stat:
     path: "{{ strata_api_key_file }}"

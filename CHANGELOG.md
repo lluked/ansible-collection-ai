@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+
+- Fix the `strata` role failing on a host where the API key directory (`/srv/ai` by default) does not exist yet. The role now creates it before generating the key.
+
 ## 1.1.1
 
 - Add the missing README and metadata to the NVIDIA roles, which Galaxy requires to import.
